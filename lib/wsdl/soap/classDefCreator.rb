@@ -369,15 +369,33 @@ private
         constname += "_#{const[constname]}"
       end
       c.def_const(constname, dqname(name))
-      c.def_method(methodname) do <<-__EOD__
-          __xmlattr[#{constname}]
-        __EOD__
+      c.def_method(methodname) do
+        define_reader_method_body(attribute, constname)
       end
-      c.def_method(methodname + '=', 'value') do <<-__EOD__
-          __xmlattr[#{constname}] = value
-        __EOD__
+
+      unless attribute.fixed
+        c.def_method(methodname + '=', 'value') do <<-__EOD__
+            __xmlattr[#{constname}] = value
+          __EOD__
+        end
       end
       c.comment << "\n  #{methodname} - #{attribute_basetype(attribute) || '(any)'}"
+    end
+  end
+
+  def define_reader_method_body(attribute, constname)
+    if f = attribute.fixed
+      <<-__EOD__
+        "#{f}"
+      __EOD__
+    elsif d = attribute.default
+      <<-__EOD__
+        __xmlattr[#{constname}] || "#{d}"
+      __EOD__
+    else
+      <<-__EOD__
+        __xmlattr[#{constname}]
+      __EOD__
     end
   end
 
