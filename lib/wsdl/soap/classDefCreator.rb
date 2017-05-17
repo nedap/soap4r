@@ -278,7 +278,7 @@ private
       parse_elements(c, typedef.elements, qname.namespace, parentmodule)
     unless typedef.attributes.empty?
       define_attribute(c, typedef.attributes)
-      init_lines << "@__xmlattr = {}"
+      init_lines << "@__xmlattr = {}" unless typedef.attributes.all?(&:fixed)
     end
     c.def_method('initialize', *init_params) do
       init_lines.join("\n")
@@ -354,7 +354,7 @@ private
 
   def define_attribute(c, attributes)
     const = {}
-    unless attributes.empty?
+    unless attributes.empty? || attributes.all?(&:fixed)
       c.def_method("__xmlattr") do <<-__EOD__
           @__xmlattr ||= {}
         __EOD__
