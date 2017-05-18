@@ -320,9 +320,9 @@ private
           c.def_attr(attrname, true, varname)
           init_lines << "@#{varname} = #{varname}"
           if element.map_as_array?
-            init_params << "#{varname} = []"
+            init_params << "#{varname}: []"
           else
-            init_params << "#{varname} = nil"
+            init_params << "#{varname}: nil"
           end
           c.comment << "\n  #{attrname} - #{create_type_name(typebase, element) || '(any)'}"
         end
