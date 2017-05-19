@@ -304,7 +304,7 @@ private
         init_lines << "@__xmlele_any = nil"
       when XMLSchema::Element
         next if element.ref == SchemaName
-        name = name_element(element).name
+        name = underscore(name_element(element).name)
         typebase = @modulepath
         if element.anonymous_type?
           inner = create_elementdef(mpath, element)
@@ -321,7 +321,7 @@ private
           init_lines << "@#{varname} = #{varname}"
           if element.map_as_array?
             init_params << "#{varname}: []"
-          else
+          else # TODO note to future-me: I might want to take the `required` attribute in to account
             init_params << "#{varname}: nil"
           end
           c.comment << "\n  #{attrname} - #{create_type_name(typebase, element) || '(any)'}"
@@ -397,6 +397,17 @@ private
         __xmlattr[#{constname}]
       __EOD__
     end
+  end
+
+  def underscore(camel_cased_word)
+    word = camel_cased_word.to_s.dup
+    word.gsub!(/::/, '/')
+    word.gsub!(/(?:([A-Za-z\d])|^)((?=a)b)(?=\b|[^a-z])/) { "#{$1}#{$1 && '_'}#{$2.downcase}" }
+    word.gsub!(/([A-Z\d]+)([A-Z][a-z])/,'\1_\2')
+    word.gsub!(/([a-z\d])([A-Z])/,'\1_\2')
+    word.tr!("-", "_")
+    word.downcase!
+    word
   end
 
   def create_arraydef(mpath, qname, typedef)
